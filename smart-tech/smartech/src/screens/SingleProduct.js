@@ -1,26 +1,38 @@
-import React, {useEffect, useState} from "react";
+import React, {useEffect} from "react";
 import Header from "./../components/Header";
 import Rating from "../components/homeComponents/Rating";
 import { Link } from "react-router-dom";
-import Message from "./../components/LoadingError/Error";
-import axios from "axios";
+import Message from "./../components/LoadingError/Error.js";
+import {useDispatch, useSelector} from "react-redux";
+import { detailsProduct } from "../Redux/Actions/ProductActions.js";
+//import productDetails from "../Redux/store.js";
+import Loading from "../components/LoadingError/Loading.js";
+
 
 const SingleProduct = ({ match }) => {
-  const[product,setProdut] = useState({});
+
+  const productID = match.params.id;
+  const productDetails = useSelector((state)=> state.productDetails)
+  const {loading,error, product} = productDetails;
+
+  const dispatch = useDispatch();
 
   useEffect(() => {
-   const fetchproduct = async() => {
-     const { data } = await axios.get(`/api/products/${match.params.id}`);
-     setProdut(data);
-   }
-   fetchproduct();
-  }, [match]);
+    dispatch(detailsProduct(productID));
+   
+  }, [dispatch,productID]);
  
   return (
     <>
       <Header />
       <div className="container single-product">
-        <div className="row">
+        {
+          loading ?
+           ( <Loading/>)
+           :error?
+           (<Message variant="alert-dander">{error}</Message>):
+           <>
+           <div className="row">
           <div className="col-md-6">
             <div className="single-image">
               <img src={product.image} alt={product.name} />
@@ -130,6 +142,11 @@ const SingleProduct = ({ match }) => {
             </div>
           </div>
         </div>
+           </>
+
+
+        }
+        
       </div>
     </>
   );
